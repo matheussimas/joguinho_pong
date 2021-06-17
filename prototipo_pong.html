@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<body>
+    <canvas id="folha" width="600" height="500"></canvas>                 
+
+    <script>
+
+        window.onload = function() {
+            iniciar();            
+            
+            // defini uma função de carregamento de tela a cada 0.03 segundos                 
+            setInterval(executar, 1000 / 30);                                               // para me dar 30 fps na animação        
+        }
+        
+        
+
+        // valores primordiais 
+        function iniciar()  {    
+            // valores iniciais
+            posicaoBolaX = posicaoBolaY = 200;
+            velocidadeBolaX = velocidadeBolaY = 8;
+            posicaoJogador1 = posicaoJogador2 = 225;
+            pontuacaoJogador1 = 0;
+            pontuacaoJogador2 = 0;
+
+
+
+            folhaDesenho = document.getElementById('folha');
+            areaDesenho = folhaDesenho.getContext('2d');
+
+            // dimensões e posições basicas das linhas
+            larguraCampo = 600;
+            alturaCampo = 500;
+            larguraRede = 5;
+            alturaRede = 500;
+            posicaoLinhaX = larguraCampo / 2 - larguraRede / 2;
+            
+            larguraRaquete = 5;
+            alturaRaquete = 50;
+
+            efeitoRaquete = 0.3;
+            velocidadeJogador2 = 5;
+
+            tamanhoBola = 5;
+
+            // afastamento da raquete da parede paralela
+            posicaoRaquete1X = 3;
+            posicaoRaquete2X = larguraCampo - larguraRaquete - posicaoRaquete1X;
+        
+            
+            // posicao jogador 1 - mouse listener
+            folhaDesenho.addEventListener('mousemove', function(e){
+            posicaoJogador1 = e.clientY - alturaRaquete / 2;
+            });        
+        }
+        
+        // desenhos
+        function desenhar()  {
+                        
+            // desenho do campo   
+            areaDesenho.fillStyle = '#286047';
+            areaDesenho.fillRect(0 , 0, larguraCampo, alturaCampo);
+                                              
+
+            // preenchimento linhas
+            areaDesenho.fillStyle = '#ffffff';
+            //linha central
+            areaDesenho.fillRect(posicaoLinhaX, 0, larguraRede, alturaRede);                                        
+
+
+            //raquetes
+            areaDesenho.fillRect(posicaoRaquete1X, posicaoJogador1, larguraRaquete, alturaRaquete);                
+            areaDesenho.fillRect(posicaoRaquete2X, posicaoJogador2, larguraRaquete, alturaRaquete);                
+                                                    
+
+
+            // bolinha
+            areaDesenho.fillRect(posicaoBolaX, posicaoBolaY, tamanhoBola, tamanhoBola);                         
+            
+
+            // placar
+            areaDesenho.fillText(pontuacaoJogador1, 100, 100);
+            areaDesenho.fillText(pontuacaoJogador2, larguraCampo - 100, 100);
+        }
+
+        // engine
+        function engine()  {
+            // animação da bolinha
+            posicaoBolaX = posicaoBolaX + velocidadeBolaX;
+            posicaoBolaY = posicaoBolaY + velocidadeBolaY;
+        
+           // faz a bola rebater nas paredes
+           if(posicaoBolaY < 0 && velocidadeBolaY < 0)  {
+               velocidadeBolaY = -velocidadeBolaY;
+           }
+                                                                                                
+           if(posicaoBolaY > alturaCampo && velocidadeBolaY > 0)  {
+               velocidadeBolaY = -velocidadeBolaY;
+           }
+
+           // verifica ponto jogador 2
+           if(posicaoBolaX < 4)  {
+           // rebatida jogador 1 
+                if(posicaoBolaY > posicaoJogador1 - tamanhoBola && posicaoBolaY < posicaoJogador1 + alturaRaquete + tamanhoBola){
+                    velocidadeBolaX = -velocidadeBolaX;
+           // efeito da bola
+            let diferencaY = posicaoBolaY - (posicaoJogador1 + alturaRaquete / 2);
+            velocidadeBolaY = diferencaY * efeitoRaquete;   
+            // pontua jogador 2
+            }  else  {
+                pontuacaoJogador2++
+                
+                resetar();
+             }
+            }    
+
+
+            //verifica pontuacao jogador 1
+            if (posicaoBolaX > larguraCampo - 4)  {
+            // rebatida jogador 2  
+                if (posicaoBolaY > posicaoJogador2 - tamanhoBola && posicaoBolaY < posicaoJogador2 + alturaRaquete + tamanhoBola)  {
+                    velocidadeBolaX = -velocidadeBolaX;
+            let diferencaY = posicaoBolaY - (posicaoJogador2 + alturaRaquete / 2);
+            velocidadeBolaY = diferencaY * efeitoRaquete;                         
+            //pontua jogador 1 
+            }  else  {                
+                    pontuacaoJogador1++
+                    
+                resetar();
+             }
+            } 
+    
+
+            //bot jogador 2
+            if (posicaoJogador2 + alturaRaquete / 2 < posicaoBolaY)  {
+                posicaoJogador2 = posicaoJogador2 + velocidadeJogador2;
+            }  else  { 
+                posicaoJogador2 = posicaoJogador2 - velocidadeJogador2;
+            }
+        }
+
+
+
+
+        // chama a função do "fps"  (vai carregar a engine e os desenhos 30 vezes por segundo)
+        function executar()  {                                                               
+            
+            desenhar();
+
+            engine();            
+        }
+    
+        // reseta a bola no campo após os pontos
+        function resetar()  {             
+                posicaoBolaX = larguraCampo / 2;
+                posicaoBolaY = alturaCampo / 2;
+                velocidadeBolaX = -velocidadeBolaX
+                velocidadeBolaY = Math.floor(Math.random() * 5) * (Math.round(Math.random()) ? 1 : -1)
+        }
+
+    </script>
+
+
+</body>
+</html>
